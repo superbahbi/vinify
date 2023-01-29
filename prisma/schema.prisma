@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   // NOTE: When using postgresql, mysql or sqlserver, uncomment the @db.Text annotations in model Account below
   // Further reading:
   // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
@@ -63,4 +63,88 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Wine {
+  id          String      @id
+  name        String
+  vintage     Int
+  varietal    String
+  inventories Inventory[]
+  orderItems  OrderItem[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model Inventory {
+  id        String   @id
+  stock     Int
+  sold      Int
+  wine      Wine     @relation(fields: [wineId], references: [id])
+  wineId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Vineyard {
+  id        String   @id
+  name      String
+  location  String
+  varietals String
+  acreage   Float
+  owner     Owner    @relation(fields: [ownerId], references: [id])
+  ownerId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Order {
+  id         String      @id
+  date       DateTime
+  customer   Customer    @relation(fields: [customerId], references: [id])
+  customerId String
+  orderItems OrderItem[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+}
+
+model OrderItem {
+  id        String   @id
+  order     Order    @relation(fields: [orderId], references: [id])
+  orderId   String
+  wine      Wine     @relation(fields: [wineId], references: [id])
+  wineId    String
+  quantity  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Vendor {
+  id           String   @id
+  name         String
+  contactName  String
+  contactEmail String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Customer {
+  id        String   @id
+  name      String
+  email     String
+  phone     String
+  address   String
+  orders    Order[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Owner {
+  id        String     @id
+  name      String
+  email     String
+  phone     String
+  vineyards Vineyard[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 }
